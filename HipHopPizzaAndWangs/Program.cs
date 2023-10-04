@@ -1,5 +1,4 @@
 using HipHopPizzaAndWangs.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using HipHopPizzaAndWangs;
@@ -42,6 +41,31 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors();
+
+// Create user 
+app.MapPost("/users", (HipHopPizzaDbContext db, User user) =>
+{
+    db.Users.Add(user);
+    db.SaveChanges();
+    return Results.Created($"/user/{user.Id}", user);
+});
+
+// Get all users
+app.MapGet("users", (HipHopPizzaDbContext db) =>
+{
+    return db.Users.ToList();
+});
+
+// Check if user is in database
+app.MapGet("checkuser/{uid}", (HipHopPizzaDbContext db, string uid) =>
+{
+    var userExist = db.Users.Where(x => x.Uid == uid).ToList();
+    if (userExist == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(userExist);
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
