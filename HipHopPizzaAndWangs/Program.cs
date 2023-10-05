@@ -67,6 +67,50 @@ app.MapGet("checkuser/{uid}", (HipHopPizzaDbContext db, string uid) =>
     return Results.Ok(userExist);
 });
 
+// Get all products
+app.MapGet("products", (HipHopPizzaDbContext db) =>
+{
+    return db.Products.ToList();
+});
+
+// Create a product
+app.MapPost("products", (HipHopPizzaDbContext db, Product product) =>
+{
+   db.Products.Add(product);
+   db.SaveChanges();
+   return Results.Created($"/products/{product.Id}", product);
+});
+
+// Update a product
+app.MapPut("/products/{id}", (HipHopPizzaDbContext db, int productId, Product product) =>
+{
+    Product productToUpdate = db.Products.FirstOrDefault(p => p.Id == productId);
+    if (productToUpdate == null)
+    {
+        return Results.NotFound("This product was not found");
+    }
+    productToUpdate.Name = product.Name;
+    productToUpdate.Price = product.Price;
+    productToUpdate.ImgUrl = product.ImgUrl;
+    db.Update(productToUpdate);
+    db.SaveChanges();
+    return Results.Ok(productToUpdate);
+});
+
+// Delete a product
+app.MapDelete("products/{id}", (HipHopPizzaDbContext db, int productId) =>
+{
+    var productToDelete = db.Products.FirstOrDefault(p => p.Id == productId);
+    if (productToDelete == null)
+    {
+        return Results.NotFound();
+    }
+    db.Remove(productToDelete);
+    db.SaveChanges();
+    return Results.Ok(productToDelete);
+});
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
