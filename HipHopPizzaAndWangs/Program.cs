@@ -152,6 +152,45 @@ app.MapDelete("orders/{id}", (HipHopPizzaDbContext db, int orderId) =>
     return Results.NoContent();
 });
 
+// Get all payment types
+app.MapGet("/paymentTypes", (HipHopPizzaDbContext db) =>
+{
+    return db.PaymentTypes.ToList();
+});
+
+// Create a payment type
+app.MapPost("/paymentTypes", (HipHopPizzaDbContext db, PaymentType paymentType) =>
+{
+    db.PaymentTypes.Add(paymentType);
+    db.SaveChanges();
+    return Results.Ok(paymentType);
+});
+
+// Update payment type
+app.MapPut("/paymentTypes/{id}", (HipHopPizzaDbContext db, int typeId, PaymentType paymentType) =>
+{
+    PaymentType paymentTypeToUpdate = db.PaymentTypes.FirstOrDefault(o => o.Id == typeId);
+    if (paymentTypeToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    paymentTypeToUpdate.Type = paymentType.Type;
+    db.SaveChanges();
+    return Results.Ok(paymentTypeToUpdate);
+});
+
+app.MapDelete("/paymentType/{id}", (HipHopPizzaDbContext db, int typeId) =>
+{
+    var typeToDelete = db.PaymentTypes.FirstOrDefault(t => t.Id == typeId);
+    if (typeToDelete == null)
+    {
+        return Results.NotFound();
+    }
+    db.PaymentTypes.Remove(typeToDelete);
+    db.SaveChanges();
+    return Results.NoContent();
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
