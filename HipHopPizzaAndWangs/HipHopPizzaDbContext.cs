@@ -46,6 +46,8 @@ namespace HipHopPizzaAndWangs;
         modelBuilder.Entity<User>().HasData(new User[] {
             new User{ Id = 1, Email = "maddi@email.com", Password = "password", Uid = "123"}
         });
+
+
     }
 
 }
