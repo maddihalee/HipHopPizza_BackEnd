@@ -98,7 +98,7 @@ app.MapPut("/products/{id}", (HipHopPizzaDbContext db, int productId, Product pr
 });
 
 // Delete a product
-app.MapDelete("products/{id}", (HipHopPizzaDbContext db, int productId) =>
+app.MapDelete("/products/{id}", (HipHopPizzaDbContext db, int productId) =>
 {
     var productToDelete = db.Products.FirstOrDefault(p => p.Id == productId);
     if (productToDelete == null)
@@ -107,9 +107,50 @@ app.MapDelete("products/{id}", (HipHopPizzaDbContext db, int productId) =>
     }
     db.Remove(productToDelete);
     db.SaveChanges();
-    return Results.Ok(productToDelete);
+    return Results.NoContent();
 });
 
+// Get all orders
+app.MapGet("/orders", (HipHopPizzaDbContext db) =>
+{
+    return db.Orders.ToList();
+});
+
+// Create an order
+app.MapPost("/orders", (HipHopPizzaDbContext db, Order order) =>
+{
+    db.Orders.Add(order);
+    db.SaveChanges();
+    return Results.Ok(order);
+});
+
+// Update an order
+app.MapPut("orders/{id}", (HipHopPizzaDbContext db, int orderId, Order order) =>
+{
+    Order orderToUpdate = db.Orders.FirstOrDefault(order => order.Id == orderId);
+    if (orderToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    orderToUpdate.UserId = order.UserId;
+    orderToUpdate.PaymentTypeId = order.PaymentTypeId;
+    orderToUpdate.StatusId = order.StatusId;
+    db.SaveChanges();
+    return Results.Ok(orderToUpdate);
+});
+
+// Delete an order
+app.MapDelete("orders/{id}", (HipHopPizzaDbContext db, int orderId) =>
+{
+    var orderToDelete = db.Orders.FirstOrDefault(o => o.Id == orderId);
+    if (orderToDelete == null)
+    {
+        return Results.NotFound();
+    }
+    db.Remove(orderToDelete);
+    db.SaveChanges();
+    return Results.NoContent();
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
