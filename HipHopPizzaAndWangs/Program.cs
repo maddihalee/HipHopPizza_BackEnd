@@ -1,7 +1,9 @@
 using HipHopPizzaAndWangs.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using HipHopPizzaAndWangs;
+using System.ComponentModel;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -152,6 +154,18 @@ app.MapDelete("orders/{id}", (HipHopPizzaDbContext db, int orderId) =>
     return Results.NoContent();
 });
 
+// Get order by ID
+app.MapGet("/orders/{id}", (HipHopPizzaDbContext db, int id) =>
+{
+    var order = db.Orders.Find(id);
+    if (order == null)
+    {
+        return Results.NotFound(id);
+    }
+
+    return Results.Ok(order);
+});
+
 // Get all payment types
 app.MapGet("/paymentTypes", (HipHopPizzaDbContext db) =>
 {
@@ -179,6 +193,7 @@ app.MapPut("/paymentTypes/{id}", (HipHopPizzaDbContext db, int typeId, PaymentTy
     return Results.Ok(paymentTypeToUpdate);
 });
 
+// Delete a payment type
 app.MapDelete("/paymentType/{id}", (HipHopPizzaDbContext db, int typeId) =>
 {
     var typeToDelete = db.PaymentTypes.FirstOrDefault(t => t.Id == typeId);
@@ -190,6 +205,83 @@ app.MapDelete("/paymentType/{id}", (HipHopPizzaDbContext db, int typeId) =>
     db.SaveChanges();
     return Results.NoContent();
 });
+
+// Get all order status
+app.MapGet("/orderstatus", (HipHopPizzaDbContext db) =>
+{
+    return db.Statuses.ToList();
+});
+
+// Adding an order status
+app.MapPost("orderstatus", (HipHopPizzaDbContext db, Status newStatus) =>
+{
+    db.Statuses.Add(newStatus);
+    db.SaveChanges();
+    return Results.Created($"/orderstatus/{newStatus.Id}", newStatus);
+});
+
+// Delete an order status
+app.MapDelete("/orderstatus/{id}", (HipHopPizzaDbContext db, int id) =>
+{
+    var status = db.Statuses.Find(id);
+    if (status == null)
+    {
+        return Results.NotFound(id);
+    }
+
+    db.Statuses.Remove(status);
+    db.SaveChanges();
+
+    return Results.NoContent();
+});
+
+//Adding Product to an Order
+app.MapPost("/productOrders", (int ProductId, int OrderId, HipHopPizzaDbContext db) =>
+{
+    var product = db.Products.Include(p => p.Orders).FirstOrDefault(p => p.Id == ProductId);
+
+    if (product == null)
+    {
+        return Results.NotFound();
+    }
+
+    var orderToAdd = db.Orders.FirstOrDefault(o => o.Id == OrderId);
+
+    if (orderToAdd == null)
+    {
+        return Results.NotFound();
+    }
+
+    product.Orders.Add(orderToAdd);
+    db.SaveChanges();
+
+    return Results.Created($"/products/{product.Id}/order/{orderToAdd.Id}", orderToAdd);
+});
+
+// Adding a status to an order
+app.MapPost("/orderStatus", (int OrderId, int OrderStatusId, HipHopPizzaDbContext db) =>
+{
+    var order = db.Orders.Include(o => o.Status).FirstOrDefault(o => o.Id == OrderId);
+
+    if (order == null)
+    {
+        return Results.NotFound();
+    }
+
+    var statusToAdd = db.Statuses.FirstOrDefault(s => s.Id == OrderStatusId);
+
+    if (statusToAdd == null)
+    {
+        return Results.NotFound();
+    }
+
+    order.StatusId = statusToAdd.Id;
+
+    db.SaveChanges();
+
+    return Results.NoContent();
+});
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
