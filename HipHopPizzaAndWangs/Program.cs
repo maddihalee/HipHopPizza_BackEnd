@@ -45,7 +45,7 @@ var app = builder.Build();
 app.UseCors();
 
 // Create user 
-app.MapPost("/users", (HipHopPizzaDbContext db, User user) =>
+app.MapPost("/register", (HipHopPizzaDbContext db, User user) =>
 {
     db.Users.Add(user);
     db.SaveChanges();
@@ -110,6 +110,18 @@ app.MapDelete("/products/{id}", (HipHopPizzaDbContext db, int productId) =>
     db.Remove(productToDelete);
     db.SaveChanges();
     return Results.NoContent();
+});
+
+// Get product by ID
+app.MapGet("/products/{id}", (HipHopPizzaDbContext db, int id) =>
+{
+    var product = db.Products.Find(id);
+    if (product == null)
+    {
+        return Results.NotFound(id);
+    }
+
+    return Results.Ok(product);
 });
 
 // Get all orders
@@ -252,7 +264,7 @@ app.MapPost("/productOrders", (int ProductId, int OrderId, HipHopPizzaDbContext 
         return Results.NotFound();
     }
 
-    product.Orders.Add(orderToAdd);
+    orderToAdd.products.Add(product);
     db.SaveChanges();
 
     return Results.Created($"/products/{product.Id}/order/{orderToAdd.Id}", orderToAdd);
