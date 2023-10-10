@@ -18,7 +18,7 @@ namespace HipHopPizzaAndWangs;
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Order>().HasData(new Order[]
         {
-            new Order{ Id = 1, UserId = 1, PaymentTypeId = 1, StatusId = 1 },
+            new Order{ Id = 1, UserId = 1, PaymentTypeId = 1, StatusId = 1, Email = "email@email.com", Name = "Madds", Phone = 9094444444, OrderType = "Open", Tip = 2.99M },
         });
 
         modelBuilder.Entity<PaymentType>().HasData(new PaymentType[]
