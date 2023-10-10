@@ -7,7 +7,7 @@
     public int PaymentTypeId { get; set; }
     public int StatusId { get; set; }
     public string Email { get; set; }
-    public string Phone { get; set; }
+    public long Phone { get; set; }
     public string OrderType { get; set; }
     public string Name { get; set; }
     public decimal Tip { get; set; }
