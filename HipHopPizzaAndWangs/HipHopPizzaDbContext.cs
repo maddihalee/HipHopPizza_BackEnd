@@ -18,7 +18,7 @@ namespace HipHopPizzaAndWangs;
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Order>().HasData(new Order[]
         {
-            new Order{ Id = 1, UserId = 1, PaymentTypeId = 1, StatusId = 1, Email = "email@email.com", Name = "Madds", Phone = 9094444444, OrderType = "Open", Tip = 2.99M },
+            new Order{ Id = 1, UserId = 1, Email = "email@email.com", Name = "Madds", Phone = 9094444444, OrderType = "Open", Tip = 2.99M },
         });
 
         modelBuilder.Entity<PaymentType>().HasData(new PaymentType[]
@@ -31,10 +31,10 @@ namespace HipHopPizzaAndWangs;
 
         modelBuilder.Entity<Product>().HasData(new Product[]
         {
-            new Product{ Id = 1, Name = "Pepperoni Pizza", Price = 24.99M, ImgUrl = "https://sipbitego.com/wp-content/uploads/2021/08/Pepperoni-Pizza-Recipe-Sip-Bite-Go.jpg" },
-            new Product{ Id = 2, Name = "Pineapple Pizza", Price = 24.99M, ImgUrl = "https://www.jessicagavin.com/wp-content/uploads/2020/07/hawaiian-pizza-16-1200.jpg" },
-            new Product{ Id = 3, Name = "Dr. Pepper", Price = 3.99M, ImgUrl = "https://californiaranchmarket.com/cdn/shop/products/000355_568234ca-45de-49f0-9e9c-65127b46be21.jpg?v=1680240542"},
-            new Product{ Id = 4, Name = "Hot Buffalo Wings", Price = 15.99M, ImgUrl = "https://mccormick.widen.net/content/n0phdkxdlp/jpeg/Franks_RedHot_Buffalo_Chicken_Wings.jpg?crop=true&anchor=0,0&q=80&color=ffffffff&u=qtpeo3&w=800&h=800"}
+            new Product{ Id = 1, Name = "Pepperoni Pizza", Price = 24.99M },
+            new Product{ Id = 2, Name = "Pineapple Pizza", Price = 24.99M },
+            new Product{ Id = 3, Name = "Dr. Pepper", Price = 3.99M },
+            new Product{ Id = 4, Name = "Hot Buffalo Wings", Price = 15.99M }
         });
 
         modelBuilder.Entity<Status>().HasData(new Status[]
