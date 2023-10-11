@@ -93,7 +93,6 @@ app.MapPut("/products/{id}", (HipHopPizzaDbContext db, int productId, Product pr
     }
     productToUpdate.Name = product.Name;
     productToUpdate.Price = product.Price;
-    productToUpdate.ImgUrl = product.ImgUrl;
     db.Update(productToUpdate);
     db.SaveChanges();
     return Results.Ok(productToUpdate);
@@ -147,8 +146,6 @@ app.MapPut("orders/{id}", (HipHopPizzaDbContext db, int orderId, Order order) =>
         return Results.NotFound();
     }
     orderToUpdate.UserId = order.UserId;
-    orderToUpdate.PaymentTypeId = order.PaymentTypeId;
-    orderToUpdate.StatusId = order.StatusId;
     db.SaveChanges();
     return Results.Ok(orderToUpdate);
 });
@@ -176,6 +173,20 @@ app.MapGet("/orders/{id}", (HipHopPizzaDbContext db, int id) =>
     }
 
     return Results.Ok(order);
+});
+
+// Get an order's products
+app.MapGet("/ordersProducts/{orderId}", (HipHopPizzaDbContext db, int orderId) =>
+{
+    var orderProducts = db.Orders.Where(x => x.Id == orderId).Include(x => x.products).FirstOrDefault();
+    if (orderProducts != null)
+    {
+        var items = orderProducts.products.ToList();
+        return Results.Ok(items);
+    } else
+    {
+        return Results.NotFound();
+    }
 });
 
 // Get all payment types
@@ -248,15 +259,8 @@ app.MapDelete("/orderstatus/{id}", (HipHopPizzaDbContext db, int id) =>
 });
 
 //Adding Product to an Order
-app.MapPost("/productOrders", (int ProductId, int OrderId, HipHopPizzaDbContext db) =>
+app.MapPost("/productOrders", (int OrderId, HipHopPizzaDbContext db, Product product) =>
 {
-    var product = db.Products.Include(p => p.Orders).FirstOrDefault(p => p.Id == ProductId);
-
-    if (product == null)
-    {
-        return Results.NotFound();
-    }
-
     var orderToAdd = db.Orders.FirstOrDefault(o => o.Id == OrderId);
 
     if (orderToAdd == null)
@@ -264,35 +268,40 @@ app.MapPost("/productOrders", (int ProductId, int OrderId, HipHopPizzaDbContext 
         return Results.NotFound();
     }
 
+    if (orderToAdd.products == null)
+    {
+        orderToAdd.products = new List<Product>();
+    }
+
     orderToAdd.products.Add(product);
     db.SaveChanges();
 
-    return Results.Created($"/products/{product.Id}/order/{orderToAdd.Id}", orderToAdd);
+    return Results.Created($"orders/{orderToAdd.Id}", orderToAdd);
 });
 
 // Adding a status to an order
-app.MapPost("/orderStatus", (int OrderId, int OrderStatusId, HipHopPizzaDbContext db) =>
-{
-    var order = db.Orders.Include(o => o.Status).FirstOrDefault(o => o.Id == OrderId);
+//app.MapPost("/orderStatus", (int OrderId, int OrderStatusId, HipHopPizzaDbContext db) =>
+//{
+//    var order = db.Orders.Include(o => o.Status).FirstOrDefault(o => o.Id == OrderId);
 
-    if (order == null)
-    {
-        return Results.NotFound();
-    }
+//    if (order == null)
+//    {
+//        return Results.NotFound();
+//    }
 
-    var statusToAdd = db.Statuses.FirstOrDefault(s => s.Id == OrderStatusId);
+//    var statusToAdd = db.Statuses.FirstOrDefault(s => s.Id == OrderStatusId);
 
-    if (statusToAdd == null)
-    {
-        return Results.NotFound();
-    }
+//    if (statusToAdd == null)
+//    {
+//        return Results.NotFound();
+//    }
 
-    order.StatusId = statusToAdd.Id;
+//    order.StatusId = statusToAdd.Id;
 
-    db.SaveChanges();
+//    db.SaveChanges();
 
-    return Results.NoContent();
-});
+//    return Results.NoContent();
+//});
 
 
 // Configure the HTTP request pipeline.
