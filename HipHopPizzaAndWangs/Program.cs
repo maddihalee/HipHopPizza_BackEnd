@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using HipHopPizzaAndWangs;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,7 @@ builder.Services.AddNpgsql<HipHopPizzaDbContext>(builder.Configuration["HipHopPi
 
 
 // Set the JSON serializer options
-builder.Services.Configure<JsonOptions>(options =>
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
 {
     options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
@@ -70,16 +71,16 @@ app.MapGet("checkuser/{uid}", (HipHopPizzaDbContext db, string uid) =>
 });
 
 // Get all products
-app.MapGet("products", (HipHopPizzaDbContext db) =>
+app.MapGet("/products", (HipHopPizzaDbContext db) =>
 {
     return db.Products.ToList();
 });
 
 // Create a product
-app.MapPost("products", (HipHopPizzaDbContext db, Product product) =>
+app.MapPost("/products", async (HipHopPizzaDbContext db, Product product) =>
 {
    db.Products.Add(product);
-   db.SaveChanges();
+   await db.SaveChangesAsync();
    return Results.Created($"/products/{product.Id}", product);
 });
 
@@ -259,7 +260,7 @@ app.MapDelete("/orderstatus/{id}", (HipHopPizzaDbContext db, int id) =>
 });
 
 //Adding Product to an Order
-app.MapPost("/productOrders", (int OrderId, HipHopPizzaDbContext db, Product product) =>
+app.MapPost("/productOrders/{OrderId}", ([FromRoute]int OrderId, HipHopPizzaDbContext db, Product product) =>
 {
     var orderToAdd = db.Orders.FirstOrDefault(o => o.Id == OrderId);
 
